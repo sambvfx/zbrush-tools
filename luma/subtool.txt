@@ -1,0 +1,118 @@
+// Copyright (c) 2015 Sam Bourne | Luma Pictures
+// All rights reserved.
+
+// Subtool specific utilities
+
+// -----------------------------------------------------------------------------
+
+[RoutineDef, UpdateSubTool,
+    // Attempt to update a subtool found within a passed directory. Files within
+    // the directory are expected to be .obj files which have file names that
+    // match the subtool they are updating.
+    //
+    // Parameters
+    // ----------
+    // searchDirectory : str
+    //     Directory to search within for obj's. This should end with a "/".
+
+    // get the subtool name
+    [VarSet, subToolName, [IGetTitle,Tool:Item Info]]
+    // trim off end period
+    [VarSet, subToolName, [StrExtract, subToolName, 0, [StrLength, subToolName]-2]]
+
+    // construct new path
+    [VarSet, path, [StrMerge, "!:", searchDirectory, subToolName, ".obj"]]
+
+    // if the obj exists, import it
+    [If, ([FileExists, [FileNameResolvePath, path]] == 1),
+        [FileNameSetNext, path]
+        // we want to change to the lowest subdiv before importing
+        [ISet, Tool:Geometry:SDiv, 1]
+        [IPress,Tool:Import]
+    ],
+    // variables passed into def
+    searchDirectory
+]
+
+[IButton, "Zplugin:Luma Tools:AllUpdate", "Update all subtools found in a specified directory.",
+    // Update any subtools with a same-named .obj file within the specified
+    // directory.
+
+    // Ask the user for the directory to check within.
+    // NOTE: After some experimenting, it turns out the trailing "/" doesn't end
+    // up affecting how the path is resolved.
+    [VarSet, searchDirectory, [StrAsk, "", "Enter a directory path to search."]]
+
+    // store current zscript path
+    [VarSet, currentZS, [FileNameResolvePath, ]]
+    // store current subtool selection
+    [VarSet, osubtool, [SubToolGetActiveIndex]]
+
+    // set the index
+    [VarSet, index, 0]
+    // loop over the number of subtools
+    [Loop, [SubToolGetCount],
+
+        // select the subtool
+        [SubToolSelect, [Val, index]]
+
+        // update subtool
+        [RoutineCall, UpdateSubTool, searchDirectory]
+
+        // increment index
+        [VarInc, index]
+    ]
+
+    // restore original selection
+    [SubtoolSelect, [Val, osubtool]]
+    // reset zscript path
+    [FileNameSetNext, currentZS]
+]
+
+[IButton, "Zplugin:Luma Tools:SelMesh", "Select specified mesh",
+    // Select a specified subtool entered by the user.
+    // FIXME: this is highly innefficient currently
+
+    // ask the user for a subtool name
+    [VarSet, fsubtool, [StrAsk, "", "Enter a SubTool name."]]
+
+    // store the original subtool
+    [VarSet, osubtool, [SubToolGetActiveIndex]]
+
+    // store a boolean of whether it was found or not
+    [VarSet, found, 0]
+
+    // set the index for iterator
+    [VarSet, index, 0]
+
+    [IFreeze,
+        // loop over number of tools
+        [Loop, [SubToolGetCount],
+
+            // select the subtool
+            [SubToolSelect, [Val, index]]
+
+            // get the subtool name
+            [VarSet, subToolName, [IGetTitle,Tool:Item Info]]
+            [VarSet, subToolName, [StrExtract, subToolName, 0, [StrLength, subToolName]-2]] // trim off end period
+
+            // if the subtool name is the same as the input name, break
+            [If, ([StrLength,subToolName] == [StrLength, fsubtool])&&([StrFind, fsubtool, subToolName] >- 1),
+                // if the subtool was found, set the `found` variable and exit the loop
+                [VarSet, found, 1]
+                [LoopExit],
+                // else increment
+                [VarInc, index]
+            ]
+        ]
+    ]
+
+    // if nothing was found select original selection
+    [If, found,
+        // do nothing if found
+        ,
+        // if not found select the original subtool and show a message
+        [Note, [StrMerge, "Subtool not found: ", fsubtool]]
+        [SubtoolSelect, osubtool]
+    ]
+]

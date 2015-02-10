@@ -1,0 +1,104 @@
+// Copyright (c) 2015 Sam Bourne | Luma Pictures
+// All rights reserved.
+
+// Misc tools within the geometry palette
+
+// -----------------------------------------------------------------------------
+
+[RoutineDef, DelLower,
+    // Delete lower subdivs
+
+    // set SDiv to the highest value
+    [ISet, Tool:Geometry:SDiv,[IGetMax, Tool:Geometry:SDiv]]
+
+    [IUnPress, Tool:Geometry:Smt]
+
+    // delete lower
+    [IPress, Tool:Geometry:Del Lower]
+
+    [IPress, Tool:Geometry:Smt]
+]
+
+[RoutineDef, BakeAllLayers,
+// TODO: finish this
+// Bake all layers
+]
+
+[RoutineDef, ReconstructSubdiv,
+    // Reconstruct Subdiv to the furthest level it can go
+
+
+    [IUnPress, Tool:Geometry:Smt]
+
+    // maxSDiv is used to test if the reconstruct did anything
+    [VarSet, maxSDiv, [IGetMax, Tool:Geometry:SDiv]]
+
+    // we'll set the max number to this loop in case something breaks
+    [Loop, 20,
+
+        // run reconstruct
+        [IPress, Tool:Geometry:Reconstruct Subdiv]
+
+        // test if it worked
+        [If, ([Val, maxSDiv] == [IGetMax, Tool:Geometry:SDiv]),
+
+            // didn't subdivide, break the loop
+            [LoopExit],
+
+            // reset the maxSDiv variable and the loop continues
+            [VarSet, maxSDiv, [IGetMax, Tool:Geometry:SDiv]]
+        ]
+    ]
+    [IPress, Tool:Geometry:Smt]
+]
+
+[IButton, "Zplugin:Luma Tools:AllDel", "Delete Lower Subdiv on all SubTools",
+    // Delete all lower SDiv for all SubTools
+
+
+    // get the original tool selected so we can restore the selection later
+    [VarSet, osubtool, [SubToolGetActiveIndex]]
+
+    // set the index
+    [VarSet, index, 0]
+    // loop over the number of subtools
+    [Loop, [SubToolGetCount],
+
+        // select the subtool
+        [SubToolSelect, [Val, index]]
+
+        // delete lower
+        [RoutineCall, DelLower]
+
+        // increment index
+        [VarInc, index]
+    ]
+    // restore original selection
+    [SubtoolSelect, [Val, osubtool]]
+]
+
+
+[IButton ,"Zplugin:Luma Tools:AllRec", "Reconstruct Subdiv on all SubTools",
+    // Reconstruct Subdiv for all SubTools
+
+    // get the original tool selected so we can restore the selection later
+    [VarSet, osubtool, [SubToolGetActiveIndex]]
+
+    // set the index
+    [VarSet, index, 0]
+    // loop over the number of subtools
+    [Loop, [SubToolGetCount],
+
+        // select the subtool
+        [SubToolSelect, [Val, index]]
+
+        // reconstruct
+        [RoutineCall, ReconstructSubdiv]
+
+        // increment index
+        [VarInc, index]
+    ]
+
+    // restore original selection
+    [SubtoolSelect, [Val, osubtool]]
+]

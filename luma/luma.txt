@@ -1,0 +1,21 @@
+// Copyright (c) 2015 Sam Bourne | Luma Pictures
+// All rights reserved.
+
+// Luma tool loader
+// Tools need to be added to this command to show up automatically in the GUI.
+// Note: the path to the tool must be relative to ZScripts/DefaultZScript.txt
+// The default zscript should have a <scriptinsert, luma/luma.txt>
+
+// -----------------------------------------------------------------------------
+
+[If, 1,
+    [Note, "Loading Luma Tools 0.1", ,1]
+
+    [ISubPalette, "Zplugin:Luma Tools"]
+
+    // geometry
+    <zscriptinsert, luma/geometry.txt>
+
+    // subtool
+    <zscriptinsert, luma/subtool.txt>
+]
