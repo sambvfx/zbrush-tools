@@ -14,8 +14,8 @@
     [ISubPalette, "Zplugin:Luma Tools"]
 
     // geometry
-    <zscriptinsert, luma/geometry.txt>
+    <zscriptinsert, tools/geometry.txt>
 
     // subtool
-    <zscriptinsert, luma/subtool.txt>
+    <zscriptinsert, tools/subtool.txt>
 ]
