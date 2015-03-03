@@ -4,7 +4,7 @@
 // Luma tool loader
 // Tools need to be added to this command to show up automatically in the GUI.
 // Note: the path to the tool must be relative to ZScripts/DefaultZScript.txt
-// The default zscript should have a <scriptinsert, luma/luma.txt>
+// The default zscript should have a <scriptinsert, tools/loader.txt>
 
 // -----------------------------------------------------------------------------
 
